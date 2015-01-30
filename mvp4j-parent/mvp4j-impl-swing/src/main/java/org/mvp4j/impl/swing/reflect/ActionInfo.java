@@ -1,12 +1,13 @@
 package org.mvp4j.impl.swing.reflect;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public class ActionInfo {
 	private String action;
 	private Class<?> eventType;
 	private String eventAction;
-	private Method method;
+	private Field field;
 	private Method actionMethod;
 
 	public String getAction() {
@@ -25,12 +26,12 @@ public class ActionInfo {
 		this.eventType = eventType;
 	}
 
-	public Method getMethod() {
-		return method;
+	public Field getField() {
+		return field;
 	}
 
-	public void setMethod(Method method) {
-		this.method = method;
+	public void setField(Field field) {
+		this.field = field;
 	}
 
 	public Method getActionMethod() {
@@ -48,7 +49,5 @@ public class ActionInfo {
 	public void setEventAction(String eventAction) {
 		this.eventAction = eventAction;
 	}
-	
-	
 
 }

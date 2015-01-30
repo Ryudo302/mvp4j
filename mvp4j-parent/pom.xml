@@ -4,12 +4,23 @@
 
 	<groupId>com.google.code.mvp4j</groupId>
 	<artifactId>mvp4j-parent</artifactId>
-	<version>2.2.0-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>MVP4J</name>
 	<description>MVP4J is a useful framework that is based primarily on practical design pattern MVP (Model View Presenter), therefore it facilitates the development of presentation layer technologies based on the principle of development events.</description>
 	<url>https://code.google.com/p/mvp4j/</url>
+
+	<licenses>
+		<license>
+			<name>Apache License 2.0</name>
+			<url>http://www.spdx.org/licenses/Apache-2.0</url>
+		</license>
+	</licenses>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
 	<build>
 		<plugins>

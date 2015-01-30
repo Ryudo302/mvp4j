@@ -11,11 +11,9 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.mvp4j.AppController;
-import org.mvp4j.adapter.ActionBinding;
 import org.mvp4j.adapter.ActionComponent;
 import org.mvp4j.adapter.MVPAdapter;
 import org.mvp4j.adapter.MVPBinding;
-import org.mvp4j.adapter.ModelBinding;
 import org.mvp4j.adapter.ModelComponent;
 import org.mvp4j.annotation.Action;
 import org.mvp4j.annotation.Actions;
@@ -41,8 +39,8 @@ public class AppControllerReflect implements AppController {
 	public MVPBinding bind(Object view, Object model, Object presenter) {
 
 		mvpBinding = new MVPBindingImpl();
-		bindModel(view, model,mvpBinding);
-		bindPresenter(view, presenter,mvpBinding);
+		bindModel(view, model, mvpBinding);
+		bindPresenter(view, presenter, mvpBinding);
 		return mvpBinding;
 
 	}
@@ -63,21 +61,19 @@ public class AppControllerReflect implements AppController {
 
 	}
 
-	private MVPBinding bindModel(Object view, Object model,
-			MVPBinding mvpBinding) {
+	private MVPBinding bindModel(Object view, Object model, MVPBinding mvpBinding) {
 
-		logger.info("Bind View :" + view.getClass().getName().toString()
-				+ " with model :" + model.getClass().getName().toString());
+		logger.info("Bind View :" + view.getClass().getName().toString() + " with model :"
+				+ model.getClass().getName().toString());
 		logger.debug("Model: " + model);
-		
+
 		mvpBinding.setView(view);
 		mvpBinding.setModel(model);
 
 		if (modelViewInfoMap.get(view.getClass().toString()) == null) {
 			processView(view.getClass());
 		}
-		ModelViewInfo modelViewInfo = modelViewInfoMap.get(view.getClass()
-				.toString());
+		ModelViewInfo modelViewInfo = modelViewInfoMap.get(view.getClass().toString());
 		if (mapViewModel.get(view) == null) {
 			mapViewModel.put(view, model);
 		}
@@ -85,19 +81,15 @@ public class AppControllerReflect implements AppController {
 		List<ModelInfo> modelsInfo = modelViewInfo.getModelsInfo();
 		for (ModelInfo modelInfo : modelsInfo) {
 			try {
-				Method method = modelInfo.getMethod();
-				Object object = method.invoke(view);
-				Class<? extends ModelComponent> componentModelClass = currentAdapter
-						.getComponentModel(object.getClass());
-				Constructor<? extends ModelComponent> constructor = componentModelClass
-						.getConstructor();
+				Field field = modelInfo.getField();
+				Object object = field.get(view);
+				Class<? extends ModelComponent> componentModelClass = currentAdapter.getComponentModel(object.getClass());
+				Constructor<? extends ModelComponent> constructor = componentModelClass.getConstructor();
 				// ModelComponent componentModel = (ModelComponent) constructor
 				// .newInstance(new ModelBindingImpl(view, model,
 				// modelInfo));
-				ModelComponent componentModel = (ModelComponent) constructor
-						.newInstance();
-				componentModel
-						.init(new ModelBindingImpl(view, model, modelInfo,mvpBinding));
+				ModelComponent componentModel = (ModelComponent) constructor.newInstance();
+				componentModel.init(new ModelBindingImpl(view, model, modelInfo, mvpBinding));
 				modelInfo.setComponentModel(componentModel);
 				componentModel.bind();
 
@@ -122,16 +114,14 @@ public class AppControllerReflect implements AppController {
 			}
 		}
 
-		logger.info("Exit Bind View :" + view.getClass().getName().toString()
-				+ " with model :" + model.getClass().getName().toString());
+		logger.info("Exit Bind View :" + view.getClass().getName().toString() + " with model :"
+				+ model.getClass().getName().toString());
 		return mvpBinding;
 
 	}
 
-	private MVPBinding bindPresenter(Object view, Object presenter,
-			MVPBinding mvpBinding) {
-		logger.info("Bind View :" + view.getClass().getName().toString()
-				+ " with presenter :"
+	private MVPBinding bindPresenter(Object view, Object presenter, MVPBinding mvpBinding) {
+		logger.info("Bind View :" + view.getClass().getName().toString() + " with presenter :"
 				+ presenter.getClass().getName().toString());
 
 		mvpBinding.setView(view);
@@ -140,26 +130,22 @@ public class AppControllerReflect implements AppController {
 		if (actionInfoMap.get(view.getClass().toString()) == null) {
 			processView(view.getClass());
 		}
-		ActionViewPresenterInfo actionViewPresenterInfo = actionInfoMap
-				.get(view.getClass().toString());
+		ActionViewPresenterInfo actionViewPresenterInfo = actionInfoMap.get(view.getClass().toString());
 
 		List<ActionInfo> actionsInfo = actionViewPresenterInfo.getActionsInfo();
 		for (ActionInfo actionInfo : actionsInfo) {
 			try {
-				Object component = actionInfo.getMethod().invoke(view);
+				Object component = actionInfo.getField().get(view);
 
-				Class componentActionClass = currentAdapter
-						.getComponentAction(component.getClass());
+				Class componentActionClass = currentAdapter.getComponentAction(component.getClass());
 				Constructor constructor = componentActionClass.getConstructor();
 
 				// ActionComponent componentAction = (ActionComponent)
 				// constructor
 				// .newInstance(new ActionBindingImpl(view, presenter,
 				// actionInfo));
-				ActionComponent componentAction = (ActionComponent) constructor
-						.newInstance();
-				componentAction.init(new ActionBindingImpl(view, presenter,
-						actionInfo));
+				ActionComponent componentAction = (ActionComponent) constructor.newInstance();
+				componentAction.init(new ActionBindingImpl(view, presenter, actionInfo));
 				componentAction.bind();
 
 			} catch (IllegalArgumentException e) {
@@ -184,8 +170,7 @@ public class AppControllerReflect implements AppController {
 
 		}
 
-		logger.info(" Exit Bind View :" + view.getClass().getName().toString()
-				+ " with presenter :"
+		logger.info(" Exit Bind View :" + view.getClass().getName().toString() + " with presenter :"
 				+ presenter.getClass().getName().toString());
 		return mvpBinding;
 
@@ -206,61 +191,57 @@ public class AppControllerReflect implements AppController {
 
 		Field[] listFieldsView = viewClass.getDeclaredFields();
 		Method[] listMethodsView = viewClass.getMethods();
-		Class presenterClass = mvp.presenterClass();
+		Class<?> presenterClass = mvp.presenterClass();
 		Method[] listMethodsPresenter = presenterClass.getMethods();
-		Class modelClass = mvp.modelClass();
+		Class<?> modelClass = mvp.modelClass();
 
 		for (Field field : listFieldsView) {
 			field.setAccessible(true);
 			if (field.isAnnotationPresent(Action.class)) {
-				Method method = findMethod(field, viewClass);
 				Action action = field.getAnnotation(Action.class);
-				actionsInfo.add(initActionInfo(method, action));
+				actionsInfo.add(initActionInfo(field, action));
 			}
 		}
 
-		for (Method method : listMethodsView) {
+		/*for (Method method : listMethodsView) {
 			if (method.isAnnotationPresent(Action.class)) {
 				if (!fieldIsAnnotated(method, viewClass)) {
 					Action action = method.getAnnotation(Action.class);
 					actionsInfo.add(initActionInfo(method, action));
 				}
 			}
-		}
+		}*/
 
 		for (Field field : listFieldsView) {
 			field.setAccessible(true);
 			if (field.isAnnotationPresent(Model.class)) {
-				Method method = findMethod(field, viewClass);
 				Model model = field.getAnnotation(Model.class);
-				modelsInfo.add(initModelInfo(method, model));
+				field.setAccessible(true);
+				modelsInfo.add(initModelInfo(field, model));
 			}
 		}
 
-		for (Method method : listMethodsView) {
-			if (method.isAnnotationPresent(Model.class)) {
-				Model model = method.getAnnotation(Model.class);
-				if (!fieldIsAnnotated(method, viewClass)) {
-					modelsInfo.add(initModelInfo(method, model));
-				}
-
-			}
-		}
+		/*
+		 * for (Method method : listMethodsView) { if (method.isAnnotationPresent(Model.class)) { Model model =
+		 * method.getAnnotation(Model.class); if (!fieldIsAnnotated(method, viewClass)) { modelsInfo.add(initModelInfo(field,
+		 * model)); }
+		 * 
+		 * } }
+		 */
 
 		for (Field field : listFieldsView) {
 			field.setAccessible(true);
 			if (field.isAnnotationPresent(Actions.class)) {
-				Method method = findMethod(field, viewClass);
 				Actions actions = field.getAnnotation(Actions.class);
 				Action[] listActions = actions.value();
 
 				for (Action action : listActions) {
-					actionsInfo.add(initActionInfo(method, action));
+					actionsInfo.add(initActionInfo(field, action));
 				}
 			}
 		}
 
-		for (Method method : listMethodsView) {
+		/*for (Method method : listMethodsView) {
 			if (method.isAnnotationPresent(Actions.class)) {
 				if (!fieldIsAnnotated(method, viewClass)) {
 					Actions actions = method.getAnnotation(Actions.class);
@@ -271,45 +252,37 @@ public class AppControllerReflect implements AppController {
 					}
 				}
 			}
-		}
+		}*/
 
 		for (ActionInfo actionInfo : actionsInfo) {
 			for (Method method : listMethodsPresenter) {
 				if (method.getName().equals(actionInfo.getAction())) {
-					logger.info("Action in Presenter Match ===> Action name: "
-							+ actionInfo.getAction() + "  Method name: "
+					logger.info("Action in Presenter Match ===> Action name: " + actionInfo.getAction() + "  Method name: "
 							+ method.getName());
 					actionInfo.setActionMethod(method);
 				}
 			}
 			if (actionInfo.getActionMethod() == null) {
 				logger.fatal("Action " + actionInfo.getAction() + " not match ");
-				throw new ActionNotFoundException(actionInfo.getAction(),
-						presenterClass);
+				throw new ActionNotFoundException(actionInfo.getAction(), presenterClass);
 			}
 		}
 
-		ActionViewPresenterInfo actionViewPresenterInfo = processViewPresenter(
-				viewClass, presenterClass, actionsInfo);
+		ActionViewPresenterInfo actionViewPresenterInfo = processViewPresenter(viewClass, presenterClass, actionsInfo);
 
 		actionInfoMap.put(viewClass.toString(), actionViewPresenterInfo);
 
-		ModelViewInfo modelViewInfo = processViewModel(viewClass, modelClass,
-				modelsInfo);
+		ModelViewInfo modelViewInfo = processViewModel(viewClass, modelClass, modelsInfo);
 
 		modelViewInfoMap.put(viewClass.toString(), modelViewInfo);
 		logger.info("Exit Parsing View");
 
 	}
 
-	private ActionViewPresenterInfo processViewPresenter(Class<?> viewClass,
-			Class<?> presenterClass, List<ActionInfo> actionsInfo) {
+	private ActionViewPresenterInfo processViewPresenter(Class<?> viewClass, Class<?> presenterClass, List<ActionInfo> actionsInfo) {
 		for (ActionInfo actionInfo : actionsInfo) {
-			logger.info("----- Action Name: " + actionInfo.getAction()
-					+ " Method: " + actionInfo.getMethod().getName()
-					+ " Action Method: "
-					+ actionInfo.getActionMethod().getName()
-					+ " Action EventType: "
+			logger.info("----- Action Name: " + actionInfo.getAction() + " Field: " + actionInfo.getField().getName()
+					+ " Action Method: " + actionInfo.getActionMethod().getName() + " Action EventType: "
 					+ actionInfo.getEventType().getName());
 		}
 		ActionViewPresenterInfo actionViewPresenterInfo = new ActionViewPresenterInfo();
@@ -319,12 +292,10 @@ public class AppControllerReflect implements AppController {
 		return actionViewPresenterInfo;
 	}
 
-	private ModelViewInfo processViewModel(Class<?> viewClass,
-			Class<?> modelClass, List<ModelInfo> modelsInfo) {
+	private ModelViewInfo processViewModel(Class<?> viewClass, Class<?> modelClass, List<ModelInfo> modelsInfo) {
 		for (ModelInfo modelInfo : modelsInfo) {
-			logger.info("----- Property Name: " + modelInfo.getPropertyName()
-					+ " Init Property Name: " + modelInfo.getIniPropertyName()
-					+ " Method: " + modelInfo.getMethod().getName());
+			logger.info("----- Property Name: " + modelInfo.getPropertyName() + " Init Property Name: "
+					+ modelInfo.getIniPropertyName() + " Field: " + modelInfo.getField().getName());
 		}
 		ModelViewInfo modelViewInfo = new ModelViewInfo();
 		modelViewInfo.setViewClass(viewClass);
@@ -340,8 +311,7 @@ public class AppControllerReflect implements AppController {
 			throw new IllegalArgumentException();
 		}
 
-		ModelViewInfo modelViewInfo = modelViewInfoMap.get(view.getClass()
-				.toString());
+		ModelViewInfo modelViewInfo = modelViewInfoMap.get(view.getClass().toString());
 		List<ModelInfo> modelsInfo = modelViewInfo.getModelsInfo();
 
 		for (ModelInfo modelInfo : modelsInfo) {
@@ -358,21 +328,21 @@ public class AppControllerReflect implements AppController {
 
 	}
 
-	private ActionInfo initActionInfo(Method method, Action action) {
+	private ActionInfo initActionInfo(Field field, Action action) {
 		ActionInfo actionInfo = new ActionInfo();
 		actionInfo.setAction(action.name());
-		actionInfo.setMethod(method);
+		actionInfo.setField(field);
 		actionInfo.setEventType(action.EventType());
 		actionInfo.setEventAction(action.EventAction());
 		return actionInfo;
 	}
 
-	private ModelInfo initModelInfo(Method method, Model model) {
+	private ModelInfo initModelInfo(Field field, Model model) {
 
 		ModelInfo modelInfo = new ModelInfo();
 		modelInfo.setPropertyName(model.property());
 		modelInfo.setIniPropertyName(model.initProperty());
-		modelInfo.setMethod(method);
+		modelInfo.setField(field);
 		return modelInfo;
 	}
 
@@ -380,8 +350,7 @@ public class AppControllerReflect implements AppController {
 		Method method = null;
 		try {
 
-			method = viewClass.getDeclaredMethod("get"
-					+ (field.getName().charAt(0) + "").toUpperCase()
+			method = viewClass.getDeclaredMethod("get" + (field.getName().charAt(0) + "").toUpperCase()
 					+ field.getName().substring(1));
 
 		} catch (SecurityException e) {
@@ -399,12 +368,10 @@ public class AppControllerReflect implements AppController {
 		boolean annotated = false;
 		try {
 
-			Field field = viewClass.getDeclaredField((method.getName()
-					.charAt(3) + "").toLowerCase()
+			Field field = viewClass.getDeclaredField((method.getName().charAt(3) + "").toLowerCase()
 					+ method.getName().substring(4));
 			field.setAccessible(true);
-			if (field.isAnnotationPresent(Action.class)
-					|| field.isAnnotationPresent(Model.class)
+			if (field.isAnnotationPresent(Action.class) || field.isAnnotationPresent(Model.class)
 					|| field.isAnnotationPresent(Actions.class)) {
 				annotated = true;
 			}
@@ -423,8 +390,7 @@ public class AppControllerReflect implements AppController {
 		return actionInfoMap;
 	}
 
-	public void setActionInfoMap(
-			Map<String, ActionViewPresenterInfo> actionInfoMap) {
+	public void setActionInfoMap(Map<String, ActionViewPresenterInfo> actionInfoMap) {
 		this.actionInfoMap = actionInfoMap;
 	}
 

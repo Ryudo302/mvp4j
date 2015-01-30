@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.mvp4j.Converter;
 import org.mvp4j.adapter.MVPBinding;
-import org.mvp4j.adapter.ModelBinding;
 import org.mvp4j.adapter.ModelComponent;
 import org.mvp4j.impl.swing.swing.DefaultConverter;
 
@@ -31,24 +30,18 @@ public class MVPBindingImpl implements MVPBinding {
 	}
 
 	@Override
-	public void setComponentModel(Object component,
-			Class<? extends ModelComponent> customizedModelComponent) {
-		AppControllerReflect appController = AppControllerReflectFactory
-				.getAppControllerInstance();
-		Map<String, ModelViewInfo> modelViewInfoMap = appController
-				.getModelViewInfoMap();
-		ModelViewInfo modelViewInfo = modelViewInfoMap.get(getView().getClass()
-				.toString());
+	public void setComponentModel(Object component, Class<? extends ModelComponent> customizedModelComponent) {
+		AppControllerReflect appController = AppControllerReflectFactory.getAppControllerInstance();
+		Map<String, ModelViewInfo> modelViewInfoMap = appController.getModelViewInfoMap();
+		ModelViewInfo modelViewInfo = modelViewInfoMap.get(getView().getClass().toString());
 		List<ModelInfo> listModelInfo = modelViewInfo.getModelsInfo();
 		for (ModelInfo modelInfo : listModelInfo) {
 			try {
-				if (modelInfo.getMethod().invoke(getView()) == component) {
+				if (modelInfo.getField().get(getView()) == component) {
 					Class<? extends ModelComponent> componentModelClass = customizedModelComponent;
-					Constructor<? extends ModelComponent> constructor = componentModelClass
-							.getConstructor();
+					Constructor<? extends ModelComponent> constructor = componentModelClass.getConstructor();
 					ModelComponent componentModel = (ModelComponent) constructor.newInstance();
-					componentModel.init(new ModelBindingImpl(getView(), getModel(),
-							modelInfo,this));
+					componentModel.init(new ModelBindingImpl(getView(), getModel(), modelInfo, this));
 					modelInfo.setComponentModel(componentModel);
 					appController.refreshView(getView());
 				}
@@ -77,25 +70,19 @@ public class MVPBindingImpl implements MVPBinding {
 
 	@Override
 	public ModelComponent getComponentModel(Object component) {
-		AppControllerReflect appController = AppControllerReflectFactory
-				.getAppControllerInstance();
-		Map<String, ModelViewInfo> modelViewInfoMap = appController
-				.getModelViewInfoMap();
-		ModelViewInfo modelViewInfo = modelViewInfoMap.get(getView().getClass()
-				.toString());
+		AppControllerReflect appController = AppControllerReflectFactory.getAppControllerInstance();
+		Map<String, ModelViewInfo> modelViewInfoMap = appController.getModelViewInfoMap();
+		ModelViewInfo modelViewInfo = modelViewInfoMap.get(getView().getClass().toString());
 		List<ModelInfo> listModelInfo = modelViewInfo.getModelsInfo();
 		for (ModelInfo modelInfo : listModelInfo) {
 			try {
-				if (modelInfo.getMethod().invoke(getView()) == component) {
+				if (modelInfo.getField().get(getView()) == component) {
 					return modelInfo.getComponentModel();
 				}
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

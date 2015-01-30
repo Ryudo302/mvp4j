@@ -6,35 +6,33 @@ import org.mvp4j.Converter;
 import org.mvp4j.adapter.ModelBinding;
 import org.mvp4j.adapter.ModelComponent;
 
-public class JLabelModelComponent extends ModelComponent{
+public class JLabelModelComponent extends ModelComponent {
 
-	  
 	private JLabel jlabel;
 
-	
 	public JLabelModelComponent() {
 	}
 
 	@Override
-	public void bind(){
-		
+	public void bind() {
+
 		jlabel.setText(modelBinding.getInitPropertyName().toString());
-		if(modelBinding.getPropertyValue()!=null){
-		jlabel.setText((String)modelBinding.getPropertyValue());
+		if (modelBinding.getPropertyValue() != null) {
+			jlabel.setText((String) modelBinding.getPropertyValue());
 		}
-		
+
 	}
 
 	@Override
 	public void unbind() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setConverter(Converter converter) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -46,8 +44,7 @@ public class JLabelModelComponent extends ModelComponent{
 	@Override
 	public void init(ModelBinding modelBinding) {
 		super.init(modelBinding);
-		jlabel=(JLabel)modelBinding.getComponent();
+		jlabel = (JLabel) modelBinding.getComponent();
 	}
-
 
 }

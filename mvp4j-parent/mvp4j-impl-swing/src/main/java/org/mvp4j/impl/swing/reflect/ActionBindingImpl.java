@@ -2,7 +2,6 @@ package org.mvp4j.impl.swing.reflect;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 
 import org.apache.log4j.Logger;
 import org.mvp4j.adapter.ActionBinding;
@@ -16,8 +15,7 @@ public class ActionBindingImpl implements ActionBinding {
 	private Object view;
 	private Logger logger = LoggerUtils.getLogger();
 
-	public ActionBindingImpl(Object view, Object presenter,
-			ActionInfo actionInfo) {
+	public ActionBindingImpl(Object view, Object presenter, ActionInfo actionInfo) {
 		this.actionInfo = actionInfo;
 		this.presenter = presenter;
 		this.view = view;
@@ -43,14 +41,11 @@ public class ActionBindingImpl implements ActionBinding {
 	public Object getComponent() {
 		Object object = null;
 		try {
-			object = actionInfo.getMethod().invoke(view);
+			object = actionInfo.getField().get(view);
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -60,23 +55,20 @@ public class ActionBindingImpl implements ActionBinding {
 	@Override
 	public void callAction(Object eventObject) {
 		try {
-			
+
 			Method method = actionInfo.getActionMethod();
-			if(method.getParameterTypes().length==0){
-			method.invoke(presenter);
-			}                               
-			else if(method.getParameterTypes().length==1){
-				if(method.getParameterTypes()[0].equals(eventObject.getClass())){
-				method.invoke(presenter,eventObject);
-				}
-				else
-					logger.error("The event object "+method.getParameterTypes()[0].toString()+" is not supported "+
-							" try this event object:  "+eventObject.getClass().toString());
-			}
-			else{
+			if (method.getParameterTypes().length == 0) {
+				method.invoke(presenter);
+			} else if (method.getParameterTypes().length == 1) {
+				if (method.getParameterTypes()[0].equals(eventObject.getClass())) {
+					method.invoke(presenter, eventObject);
+				} else
+					logger.error("The event object " + method.getParameterTypes()[0].toString() + " is not supported "
+							+ " try this event object:  " + eventObject.getClass().toString());
+			} else {
 				logger.error("The action must have one parameter ");
 			}
-			
+
 		} catch (SecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

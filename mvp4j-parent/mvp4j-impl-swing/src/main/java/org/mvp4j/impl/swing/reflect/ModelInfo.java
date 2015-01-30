@@ -1,6 +1,6 @@
 package org.mvp4j.impl.swing.reflect;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 
 import org.mvp4j.adapter.ModelComponent;
 
@@ -8,7 +8,7 @@ public class ModelInfo {
 
 	private String propertyName;
 	private String iniPropertyName;
-	private Method method;
+	private Field field;
 	private ModelComponent componentModel;
 
 	public String getPropertyName() {
@@ -27,12 +27,12 @@ public class ModelInfo {
 		this.iniPropertyName = iniPropertyName;
 	}
 
-	public Method getMethod() {
-		return method;
+	public Field getField() {
+		return field;
 	}
 
-	public void setMethod(Method method) {
-		this.method = method;
+	public void setField(Field field) {
+		this.field = field;
 	}
 
 	public ModelComponent getComponentModel() {
@@ -42,7 +42,5 @@ public class ModelInfo {
 	public void setComponentModel(ModelComponent componentModel) {
 		this.componentModel = componentModel;
 	}
-	
-	
 
 }
